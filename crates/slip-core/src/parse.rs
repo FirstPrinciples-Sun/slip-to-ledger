@@ -25,7 +25,28 @@ pub fn parse(ctx: &SlipContext) -> crate::Result<NormalizedSlip> {
         PartialSlip::default()
     };
 
+    let qr_decoded = ctx
+        .qr_payload
+        .as_ref()
+        .and_then(|p| crate::qr::parse_promptpay_tlv(p).ok());
+
+    let amount = qr_decoded
+        .as_ref()
+        .and_then(|q| q.amount)
+        .or(partial.amount)
+        .unwrap_or(0.0);
+
+    let reference = qr_decoded
+        .as_ref()
+        .and_then(|q| q.reference1.clone().or_else(|| q.bill_id.clone()))
+        .or(partial.reference);
+
     let confidence_overall = (score as f32 / 100.0).min(1.0);
+
+    let qr_code = ctx.qr_payload.as_ref().map(|p| crate::schema::QrCode {
+        raw_payload: Some(p.clone()),
+        decoded: qr_decoded.as_ref().and_then(|q| serde_json::to_value(q).ok()),
+    });
 
     Ok(NormalizedSlip {
         metadata: Metadata {
@@ -37,9 +58,9 @@ pub fn parse(ctx: &SlipContext) -> crate::Result<NormalizedSlip> {
         },
         transaction: Transaction {
             id: partial.transaction_id,
-            reference: partial.reference,
+            reference,
             timestamp: partial.timestamp.unwrap_or_else(Utc::now),
-            amount: partial.amount.unwrap_or(0.0),
+            amount,
             currency: "THB".into(),
             fee: partial.fee,
         },
@@ -48,10 +69,7 @@ pub fn parse(ctx: &SlipContext) -> crate::Result<NormalizedSlip> {
             receiver: partial.receiver.unwrap_or_default(),
         },
         channel: partial.channel,
-        qr_code: ctx.qr_payload.as_ref().map(|p| crate::schema::QrCode {
-            raw_payload: Some(p.clone()),
-            decoded: None,
-        }),
+        qr_code,
         fraud_signals: FraudSignals::default(),
         field_confidence: partial.field_confidence,
     })

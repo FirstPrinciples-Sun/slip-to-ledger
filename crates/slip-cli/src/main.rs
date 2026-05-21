@@ -21,9 +21,7 @@ enum Cmd {
         format: String,
     },
     /// Watch a directory and process new slips as they appear.
-    Watch {
-        path: PathBuf,
-    },
+    Watch { path: PathBuf },
     /// Print the JSON schema for NormalizedSlip.
     Schema,
 }

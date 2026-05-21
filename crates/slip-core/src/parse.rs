@@ -3,10 +3,9 @@
 use crate::banks::{all_adapters, BankAdapter, PartialSlip};
 use crate::ocr_input::SlipContext;
 use crate::schema::{
-    FraudSignals, Metadata, NormalizedSlip, Parties, Party, SlipType, SourceBank, Transaction,
+    FraudSignals, Metadata, NormalizedSlip, Parties, SlipType, SourceBank, Transaction,
 };
 use chrono::Utc;
-use std::collections::BTreeMap;
 
 pub fn parse(ctx: &SlipContext) -> crate::Result<NormalizedSlip> {
     let adapters = all_adapters();

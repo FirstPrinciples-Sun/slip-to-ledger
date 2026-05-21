@@ -3,7 +3,7 @@
 //! Pipeline: grayscale → Otsu binarization → skew estimation/correction → crop.
 //! All ops are pure-Rust and WASM-compatible (uses only the `image` crate).
 
-use image::{DynamicImage, GenericImageView, GrayImage, ImageBuffer, Luma};
+use image::{DynamicImage, GrayImage, ImageBuffer, Luma};
 
 pub fn to_grayscale(img: &DynamicImage) -> GrayImage {
     img.to_luma8()

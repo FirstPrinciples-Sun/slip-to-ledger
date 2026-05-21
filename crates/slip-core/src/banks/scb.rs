@@ -41,16 +41,10 @@ impl BankAdapter for ScbAdapter {
         };
 
         p.timestamp = parse_thai_datetime(t);
-        p.amount = parse_amount_near(
-            t,
-            &["จำนวนเงิน", "จำนวน", "Amount", "ยอดโอน"],
-        );
+        p.amount = parse_amount_near(t, &["จำนวนเงิน", "จำนวน", "Amount", "ยอดโอน"]);
         p.fee = parse_amount_near(t, &["ค่าธรรมเนียม", "Fee"]);
 
-        p.reference = parse_reference_near(
-            t,
-            &["รหัสอ้างอิง", "เลขที่อ้างอิง", "Reference"],
-        );
+        p.reference = parse_reference_near(t, &["รหัสอ้างอิง", "เลขที่อ้างอิง", "Reference"]);
         p.transaction_id = parse_reference_near(t, &["Transaction ID", "เลขที่รายการ"]);
 
         if let Some((sender_block, receiver_block)) = split_parties(t) {

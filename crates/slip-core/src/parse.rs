@@ -44,7 +44,9 @@ pub fn parse(ctx: &SlipContext) -> crate::Result<NormalizedSlip> {
 
     let qr_code = ctx.qr_payload.as_ref().map(|p| crate::schema::QrCode {
         raw_payload: Some(p.clone()),
-        decoded: qr_decoded.as_ref().and_then(|q| serde_json::to_value(q).ok()),
+        decoded: qr_decoded
+            .as_ref()
+            .and_then(|q| serde_json::to_value(q).ok()),
     });
 
     Ok(NormalizedSlip {

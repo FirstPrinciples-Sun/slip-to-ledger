@@ -148,7 +148,11 @@ mod tests {
                 fee: None,
             },
             parties: Parties {
-                sender: Party { name: Some("Test".into()), account_masked: Some("xxx-x-12345-6".into()), bank: Some("kbank".into()) },
+                sender: Party {
+                    name: Some("Test".into()),
+                    account_masked: Some("xxx-x-12345-6".into()),
+                    bank: Some("kbank".into()),
+                },
                 receiver: Party::default(),
             },
             channel: Some(Channel::MobileApp),

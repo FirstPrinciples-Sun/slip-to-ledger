@@ -41,3 +41,37 @@
 **Note on D3:** Synthetic slip generator real impl deferred — currently text-fixture-driven adapter tests cover correctness sufficiently. Will roll into D12 (test hardening) once Rust toolchain available for full snapshot testing.
 
 **Next (D5):** BBL, KTB, BAY, TTB, GSB, TrueMoney adapters using same `thai_utils` pattern. ~30 minutes per bank.
+
+## 2026-05-21 — CI Postmortem (commits 49ae8c9, 3a5f8c8, 927effe, 915fedf all red)
+
+**What broke:**
+1. `slip-wasm/Cargo.toml` referenced `image::ImageFormat::Png` and `image::load_from_memory` but never declared `image` as a direct dep — only inherited transitively through `slip-core`. Path-dep transitive imports are not visible without explicit declaration. **3 × E0433 errors.**
+2. `cargo fmt --check` failed across **7 files** (kbank.rs, scb.rs, parse.rs, preprocess.rs, qr.rs, schema.rs) — code was hand-written without rustfmt because the dev machine has no Rust toolchain installed.
+3. `parse.rs` had `Party` and `BTreeMap` imports that became unused after the D2 QR-anchor refactor. Unused imports are warnings → errors under `RUSTFLAGS=-D warnings`.
+4. `preprocess.rs` imported `GenericImageView` which is provided implicitly via the `image` prelude — also unused-import error.
+
+**Why it happened (root cause):**
+Local environment has no `rustup`/`cargo` → can't run `cargo fmt` / `cargo clippy` / `cargo check` / `cargo build` locally before push. Every commit goes blind to GitHub Actions CI for first feedback. Each CI cycle is ~2 minutes wasted per fix iteration.
+
+**Fixes applied (commit a37d4eb):**
+- Added `image.workspace = true` to `slip-wasm/Cargo.toml`.
+- Removed `Party` + `BTreeMap` from `parse.rs` imports.
+- Removed `GenericImageView` from `preprocess.rs` imports.
+- Reformatted 7 files to match what rustfmt would produce: collapse argument lists that fit on one line, expand single-statement closures only when they don't fit, expand long `if cond1 && cond2` into multi-line with `&&` at line start.
+
+**Lesson learned (write down so this never repeats):**
+1. **Install rustup before continuing past D5.** Without it, every Rust change ships blind. https://rustup.rs takes 5 minutes.
+2. **Until rustup is installed, follow the rustfmt convention manually:**
+   - Function calls fitting on one line → keep on one line. Don't pre-split args "for readability."
+   - Closures with single expr → no braces (`|x| Luma(...)`, not `|x| { Luma(...) }`).
+   - `&&`/`||` chains: if line > 100 cols, break before the operator, indent +4.
+   - Imports: add to `Cargo.toml` workspace deps + the crate's `[dependencies]` for **every** crate that uses the symbol — never rely on transitive availability.
+3. **Always `RUSTFLAGS=-D warnings` in mind:** unused imports, dead code, dead vars are errors. Strip imports as part of the same edit that removes their usage.
+4. **CI matrix order:** rust → wasm → web. Web step is downstream of wasm — don't push if wasm is broken (web `npm run build` doesn't catch it because we haven't wired wasm-pack output to web yet).
+
+**Pre-push checklist (manual until rustup installed):**
+- [ ] No multi-line function calls when args fit on one line
+- [ ] All `image::` / `chrono::` / `regex::` etc. usage has explicit dep in *that* crate's Cargo.toml
+- [ ] `parse.rs` imports match what's actually referenced
+- [ ] No leftover `BTreeMap` / `Party` / etc. imports after refactor
+- [ ] If touched `slip-wasm`: confirm `image.workspace = true` still present

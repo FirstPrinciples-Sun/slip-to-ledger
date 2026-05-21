@@ -42,16 +42,19 @@ impl BankAdapter for KbankAdapter {
 
         p.timestamp = parse_thai_datetime(t);
 
-        p.amount = parse_amount_near(
-            t,
-            &["จำนวนเงิน", "จำนวน", "Amount", "ยอดโอน"],
-        );
+        p.amount = parse_amount_near(t, &["จำนวนเงิน", "จำนวน", "Amount", "ยอดโอน"]);
 
         p.fee = parse_amount_near(t, &["ค่าธรรมเนียม", "Fee"]);
 
         p.reference = parse_reference_near(
             t,
-            &["รหัสอ้างอิง", "เลขที่อ้างอิง", "Reference No.", "Ref:", "Ref."],
+            &[
+                "รหัสอ้างอิง",
+                "เลขที่อ้างอิง",
+                "Reference No.",
+                "Ref:",
+                "Ref.",
+            ],
         );
         p.transaction_id = parse_reference_near(t, &["Transaction ID", "เลขที่รายการ"]);
 
@@ -61,12 +64,10 @@ impl BankAdapter for KbankAdapter {
         }
 
         if p.amount.is_some() {
-            p.field_confidence
-                .insert("amount".into(), 0.85);
+            p.field_confidence.insert("amount".into(), 0.85);
         }
         if p.timestamp.is_some() {
-            p.field_confidence
-                .insert("timestamp".into(), 0.9);
+            p.field_confidence.insert("timestamp".into(), 0.9);
         }
 
         Ok(p)
@@ -90,7 +91,8 @@ fn parse_party(block: &str) -> Option<Party> {
         if trimmed.is_empty() {
             continue;
         }
-        if trimmed.chars().any(|c| c.is_ascii_digit()) && trimmed.chars().filter(|c| c.is_ascii_digit()).count() >= 4 {
+        let digit_count = trimmed.chars().filter(|c| c.is_ascii_digit()).count();
+        if digit_count >= 4 {
             p.account_masked = Some(mask_account(trimmed));
         } else if name_line.is_none() {
             name_line = Some(trimmed.to_string());

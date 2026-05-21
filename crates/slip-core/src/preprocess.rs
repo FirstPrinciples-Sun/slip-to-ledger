@@ -131,7 +131,11 @@ fn downscale(src: &GrayImage, target_w: u32) -> GrayImage {
         for x in 0..target_w {
             let sx = (x as f32 / scale) as u32;
             let sy = (y as f32 / scale) as u32;
-            out.put_pixel(x, y, *src.get_pixel(sx.min(src.width() - 1), sy.min(src.height() - 1)));
+            out.put_pixel(
+                x,
+                y,
+                *src.get_pixel(sx.min(src.width() - 1), sy.min(src.height() - 1)),
+            );
         }
     }
     out
@@ -155,9 +159,7 @@ mod tests {
     use image::{ImageBuffer, Luma};
 
     fn synth_bimodal(w: u32, h: u32) -> GrayImage {
-        ImageBuffer::from_fn(w, h, |x, _| {
-            Luma([if x < w / 2 { 30 } else { 220 }])
-        })
+        ImageBuffer::from_fn(w, h, |x, _| Luma([if x < w / 2 { 30 } else { 220 }]))
     }
 
     #[test]

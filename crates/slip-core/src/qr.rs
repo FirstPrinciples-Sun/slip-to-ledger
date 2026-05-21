@@ -143,8 +143,7 @@ fn parse_tlv(input: &[u8]) -> Result<Vec<(String, String)>, String> {
         let tag = std::str::from_utf8(&input[i..i + 2])
             .map_err(|_| "invalid tag utf8")?
             .to_string();
-        let len_str =
-            std::str::from_utf8(&input[i + 2..i + 4]).map_err(|_| "invalid len utf8")?;
+        let len_str = std::str::from_utf8(&input[i + 2..i + 4]).map_err(|_| "invalid len utf8")?;
         let len: usize = len_str.parse().map_err(|_| "invalid len digits")?;
         let value_start = i + 4;
         let value_end = value_start + len;
@@ -170,8 +169,8 @@ fn verify_crc(payload: &str) -> Result<bool, String> {
         .rposition(|w| w == b"6304")
         .ok_or("missing CRC marker")?;
     let covered = &bytes[..crc_marker_pos + 4];
-    let claimed_hex = std::str::from_utf8(&bytes[crc_marker_pos + 4..])
-        .map_err(|_| "invalid CRC utf8")?;
+    let claimed_hex =
+        std::str::from_utf8(&bytes[crc_marker_pos + 4..]).map_err(|_| "invalid CRC utf8")?;
     let claimed = u16::from_str_radix(claimed_hex.trim(), 16).map_err(|_| "invalid CRC hex")?;
     Ok(crc16_ccitt_false(covered) == claimed)
 }

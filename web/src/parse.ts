@@ -81,9 +81,29 @@ function parseAmountNear(text: string, labels: string[]): number | null {
     if (idx === -1) continue;
     const after = norm.slice(idx + label.length, idx + label.length + 80);
     const m = after.match(/([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/);
-    if (m) return parseFloat(m[1].replace(/,/g, ""));
+    if (m) {
+      const v = parseFloat(m[1].replace(/,/g, ""));
+      if (v > 0) return v;
+    }
   }
   return null;
+}
+
+/**
+ * Fallback: scan the whole slip for "<number> บาท" or "<number> THB",
+ * pick the largest match (slips usually show fee = 0.00 separately, so the
+ * transfer amount is the bigger one). Used when label-anchored search fails.
+ */
+function parseAmountFallback(text: string): number | null {
+  const norm = thaiToArabic(text);
+  const re = /([0-9]{1,3}(?:,[0-9]{3})*\.[0-9]{2}|[0-9]+\.[0-9]{2})\s*(?:บาท|THB|฿)/g;
+  let max = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(norm))) {
+    const v = parseFloat(m[1].replace(/,/g, ""));
+    if (v > max) max = v;
+  }
+  return max > 0 ? max : null;
 }
 
 function parseRefNear(text: string, labels: string[]): string | null {
@@ -133,24 +153,49 @@ function parsePartyName(text: string, label: string, until: string[]): string | 
 
 export function parseSlip(text: string): ParsedSlip {
   const detected = detectBank(text);
+  const amount =
+    parseAmountNear(text, [
+      "จำนวนเงิน",
+      "จำนวน",
+      "ยอดโอน",
+      "ยอดเงิน",
+      "ยอดที่โอน",
+      "ยอดที่ชำระ",
+      "Transfer Amount",
+      "Transferred Amount",
+      "Amount",
+      "Total",
+    ]) ?? parseAmountFallback(text);
+
+  const fee = parseAmountNear(text, ["ค่าธรรมเนียม", "Fee", "Service fee"]);
+
   return {
     bank: detected.bank,
     bankConfidence: detected.confidence,
-    amount: parseAmountNear(text, ["จำนวนเงิน", "จำนวน", "Amount", "ยอดโอน"]),
-    fee: parseAmountNear(text, ["ค่าธรรมเนียม", "Fee"]),
+    amount,
+    fee,
     date: parseThaiDate(text),
     reference: parseRefNear(text, [
       "รหัสอ้างอิง",
       "เลขที่อ้างอิง",
+      "เลขที่รายการ",
+      "เลขที่ทำรายการ",
+      "หมายเลขอ้างอิง",
       "Reference No.",
       "Reference",
+      "Ref ID",
       "Ref:",
       "Ref.",
+      "Transaction ID",
     ]),
-    senderName: parsePartyName(text, "จาก", ["ไปยัง", "ผู้รับ"])
-      ?? parsePartyName(text, "ผู้โอน", ["ไปยัง", "ผู้รับ"]),
-    receiverName: parsePartyName(text, "ไปยัง", ["จำนวน", "ค่าธรรมเนียม", "รหัส"])
-      ?? parsePartyName(text, "ผู้รับ", ["จำนวน", "ค่าธรรมเนียม", "รหัส"]),
+    senderName:
+      parsePartyName(text, "จาก", ["ไปยัง", "ผู้รับ", "ไป"]) ??
+      parsePartyName(text, "ผู้โอน", ["ไปยัง", "ผู้รับ", "จำนวน"]) ??
+      parsePartyName(text, "From", ["To", "Amount"]),
+    receiverName:
+      parsePartyName(text, "ไปยัง", ["จำนวน", "ค่าธรรมเนียม", "รหัส", "เลขที่"]) ??
+      parsePartyName(text, "ผู้รับ", ["จำนวน", "ค่าธรรมเนียม", "รหัส", "เลขที่"]) ??
+      parsePartyName(text, "To", ["Amount", "Fee", "Reference"]),
     rawText: text,
   };
 }

@@ -173,7 +173,7 @@ mod tests {
         // Otsu on a clean bimodal histogram (only 30 and 220 populated)
         // should pick a threshold ≥ 30 and < 220 — anything in that range
         // produces the same binarization.
-        assert!(t >= 30 && t < 220, "threshold {t} should split modes");
+        assert!((30..220).contains(&t), "threshold {t} should split modes");
         let total_white = bin.pixels().filter(|p| p.0[0] == 255).count();
         assert!(total_white > 0 && total_white < 40 * 10);
     }

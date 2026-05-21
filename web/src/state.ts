@@ -10,14 +10,17 @@ export interface SlipRow {
   confidence: number; // 0..1
   status: SlipStatus;
   raw?: unknown;
+  imageDataUrl?: string;
 }
 
 export interface AppState {
   slips: SlipRow[];
   filter: "all" | "ready" | "review" | "failed";
+  selectedId: string | null;
 }
 
 export const initialState: AppState = {
   slips: [],
   filter: "all",
+  selectedId: null,
 };

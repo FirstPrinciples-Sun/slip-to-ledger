@@ -1,7 +1,10 @@
 import { t } from "../i18n";
 import type { AppState, SlipRow } from "../state";
 
-export function renderBatchTable(state: AppState): HTMLElement {
+export function renderBatchTable(
+  state: AppState,
+  onSelectRow: (id: string) => void,
+): HTMLElement {
   const wrap = document.createElement("div");
   wrap.style.marginTop = "var(--space-5)";
 
@@ -41,7 +44,9 @@ export function renderBatchTable(state: AppState): HTMLElement {
   `;
   const tbody = table.querySelector("tbody")!;
   for (const s of filterRows(state)) {
-    tbody.appendChild(renderRow(s));
+    const tr = renderRow(s, state.selectedId === s.id);
+    tr.addEventListener("click", () => onSelectRow(s.id));
+    tbody.appendChild(tr);
   }
   wrap.appendChild(table);
   return wrap;
@@ -62,8 +67,9 @@ function countByStatus(slips: SlipRow[]) {
   );
 }
 
-function renderRow(s: SlipRow): HTMLTableRowElement {
+function renderRow(s: SlipRow, selected: boolean): HTMLTableRowElement {
   const tr = document.createElement("tr");
+  if (selected) tr.classList.add("selected");
   tr.innerHTML = `
     <td><span class="bank-chip">${escapeHtml(s.bank)}</span></td>
     <td style="text-align:right; font-variant-numeric: tabular-nums;">${formatAmount(s.amount)}</td>

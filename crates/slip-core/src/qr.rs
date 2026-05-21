@@ -212,7 +212,8 @@ mod tests {
         assert_eq!(qr.format.as_deref(), Some("01"));
         assert_eq!(qr.init_method, Some(InitMethod::Static));
         assert_eq!(qr.merchant_aid.as_deref(), Some("A000000677010111"));
-        assert_eq!(qr.mobile.as_deref(), Some("0668123456785"));
+        // BOT format: 0066 prefix + 0812345678 → normalized to 0812345678 (Thai 0-prefixed).
+        assert_eq!(qr.mobile.as_deref(), Some("0812345678"));
         assert_eq!(qr.country.as_deref(), Some("TH"));
         assert_eq!(qr.currency.as_deref(), Some("764"));
         assert!(qr.amount.is_none());

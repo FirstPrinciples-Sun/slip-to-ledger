@@ -14,15 +14,19 @@ pub fn to_grayscale(img: &DynamicImage) -> GrayImage {
 pub fn otsu_threshold(gray: &GrayImage) -> (GrayImage, u8) {
     let histogram = histogram(gray);
     let total = (gray.width() * gray.height()) as f64;
-    let sum_total: f64 = (0..256).map(|t| (t as f64) * histogram[t] as f64).sum();
+    let sum_total: f64 = histogram
+        .iter()
+        .enumerate()
+        .map(|(t, &h)| (t as f64) * h as f64)
+        .sum();
 
     let mut sum_b = 0.0;
     let mut w_b = 0.0;
     let mut max_var = 0.0;
     let mut threshold: u8 = 127;
 
-    for t in 0..256 {
-        w_b += histogram[t] as f64;
+    for (t, &h) in histogram.iter().enumerate() {
+        w_b += h as f64;
         if w_b == 0.0 {
             continue;
         }
@@ -30,7 +34,7 @@ pub fn otsu_threshold(gray: &GrayImage) -> (GrayImage, u8) {
         if w_f == 0.0 {
             break;
         }
-        sum_b += (t as f64) * histogram[t] as f64;
+        sum_b += (t as f64) * h as f64;
         let m_b = sum_b / w_b;
         let m_f = (sum_total - sum_b) / w_f;
         let between = w_b * w_f * (m_b - m_f).powi(2);

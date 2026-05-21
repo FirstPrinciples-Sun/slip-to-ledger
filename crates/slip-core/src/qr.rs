@@ -65,8 +65,10 @@ pub fn parse_promptpay_tlv(payload: &str) -> crate::Result<PromptPayQr> {
     let bytes = payload.as_bytes();
     let entries = parse_tlv(bytes).map_err(Error::Qr)?;
 
-    let mut out = PromptPayQr::default();
-    out.crc_ok = verify_crc(payload).unwrap_or(false);
+    let mut out = PromptPayQr {
+        crc_ok: verify_crc(payload).unwrap_or(false),
+        ..Default::default()
+    };
 
     for (tag, value) in &entries {
         match tag.as_str() {

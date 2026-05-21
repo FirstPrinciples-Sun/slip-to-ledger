@@ -104,7 +104,7 @@ pub fn parse_amount(text: &str) -> Option<f64> {
 }
 
 /// Find the first amount that appears near a label keyword (e.g. "จำนวนเงิน").
-pub fn parse_amount_near<'a>(text: &'a str, label_patterns: &[&str]) -> Option<f64> {
+pub fn parse_amount_near(text: &str, label_patterns: &[&str]) -> Option<f64> {
     let normalized = thai_to_arabic_digits(text);
     for label in label_patterns {
         if let Some(idx) = normalized.find(label) {
@@ -120,7 +120,7 @@ pub fn parse_amount_near<'a>(text: &'a str, label_patterns: &[&str]) -> Option<f
 /// Extract a transaction reference following labels like "เลขที่อ้างอิง" / "Ref".
 static REF_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"[A-Z0-9]{6,}").unwrap());
 
-pub fn parse_reference_near<'a>(text: &'a str, label_patterns: &[&str]) -> Option<String> {
+pub fn parse_reference_near(text: &str, label_patterns: &[&str]) -> Option<String> {
     for label in label_patterns {
         if let Some(idx) = text.find(label) {
             let after = &text[idx + label.len()..];

@@ -19,6 +19,7 @@ export function setLang(l: Lang) {
 const STRINGS = {
   th: {
     add_slip: "+ เพิ่มสลิป",
+    export: "ส่งออก",
     hero_title_a: "สลิปโอนเงิน → ",
     hero_title_b: "Sheet",
     hero_title_c: " ใน 3 วินาที",
@@ -46,6 +47,7 @@ const STRINGS = {
   },
   en: {
     add_slip: "+ Add slip",
+    export: "Export",
     hero_title_a: "Bank slips → ",
     hero_title_b: "Sheet",
     hero_title_c: " in 3 seconds",

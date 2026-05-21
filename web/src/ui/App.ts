@@ -4,15 +4,23 @@ import { renderHero } from "./Hero";
 import { renderDropZone } from "./DropZone";
 import { renderBatchTable } from "./BatchTable";
 import { renderDetailPanel } from "./DetailPanel";
+import { renderExportModal } from "./ExportModal";
 import { ocrImage } from "../ocr";
 import { parseSlip, bankLabel } from "../parse";
 
 export function renderApp(root: HTMLElement) {
   const state: AppState = { ...initialState };
+  let exportOpen = false;
 
   function rerender() {
     root.innerHTML = "";
-    root.appendChild(renderTopbar());
+    const topbar = renderTopbar();
+    topbar.querySelector("#export-btn")?.addEventListener("click", () => {
+      if (state.slips.length === 0) return;
+      exportOpen = true;
+      rerender();
+    });
+    root.appendChild(topbar);
 
     if (state.slips.length === 0) {
       root.appendChild(renderHero());
@@ -64,6 +72,15 @@ export function renderApp(root: HTMLElement) {
     }
 
     root.appendChild(layout);
+
+    if (exportOpen) {
+      root.appendChild(
+        renderExportModal(state.slips, () => {
+          exportOpen = false;
+          rerender();
+        }),
+      );
+    }
   }
 
   async function processSlip(id: string, file: File) {
@@ -81,9 +98,7 @@ export function renderApp(root: HTMLElement) {
       r.date = parsed.date;
       r.confidence = ocr.confidence;
       r.raw = parsed;
-      r.status =
-        parsed.amount !== null && parsed.bank !== "unknown" ? "ready"
-        : ocr.confidence > 0 ? "review" : "failed";
+      r.status = decideStatus(parsed, ocr.confidence);
     } catch (e) {
       const r = state.slips.find((s) => s.id === id);
       if (r) r.status = "failed";
@@ -105,4 +120,20 @@ function fileToDataUrl(f: File): Promise<string> {
     reader.onerror = reject;
     reader.readAsDataURL(f);
   });
+}
+
+import type { ParsedSlip } from "../parse";
+function decideStatus(p: ParsedSlip, ocrConfidence: number): SlipRow["status"] {
+  if (ocrConfidence === 0) return "failed";
+  // Score the extraction quality across 4 critical fields.
+  let score = 0;
+  if (p.bank !== "unknown") score += 0.3;
+  if (p.amount !== null && p.amount > 0) score += 0.4;
+  if (p.date !== null) score += 0.15;
+  if (p.reference) score += 0.15;
+  // Combine with raw OCR confidence — both must be reasonable.
+  const combined = score * 0.7 + ocrConfidence * 0.3;
+  if (combined >= 0.75 && p.amount !== null && p.bank !== "unknown") return "ready";
+  if (combined >= 0.3) return "review";
+  return "failed";
 }

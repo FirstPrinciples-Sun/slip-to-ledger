@@ -33,7 +33,7 @@ export function renderTopbar(): HTMLElement {
       <button class="btn ghost" id="theme-toggle" aria-label="Toggle theme">${themeIcon}</button>
       <a class="btn ghost" href="https://github.com/FirstPrinciples-Sun/slip-to-ledger"
          target="_blank" rel="noopener">GitHub</a>
-      <button class="btn primary">${t("add_slip")}</button>
+      <button class="btn primary" id="export-btn">${t("export")}</button>
     </div>
   `;
 

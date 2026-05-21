@@ -75,3 +75,36 @@ Local environment has no `rustup`/`cargo` → can't run `cargo fmt` / `cargo cli
 - [ ] `parse.rs` imports match what's actually referenced
 - [ ] No leftover `BTreeMap` / `Party` / etc. imports after refactor
 - [ ] If touched `slip-wasm`: confirm `image.workspace = true` still present
+
+## 2026-05-21 — CI green at last (commit 13d068c)
+
+After 7 failing CI cycles, all 3 jobs (rust+wasm+web) green. **17/17 unit tests pass.**
+
+**Lessons (final, after going green):**
+
+1. **rustfmt rules I kept missing by hand:**
+   - Function calls with args fitting on one line → MUST stay one line. `parse_reference_near(t, &["a", "b", "c", "d", "e"])` stays single-line if total < 100 col, even with 5 array elements.
+   - String literals that don't fit single line: `let body = "..."` keep on one line if the literal length itself > 100 col (rustfmt won't split a string).
+   - `String::from("...")` multi-line: trailing comma required after the literal.
+   - Single-expr closures: no braces. `|x, _| Luma([...])` not `|x, _| { Luma([...]) }`.
+   - `static FOO: Type = expr;` collapses to one line if it fits ≤ 100 col.
+   - Imports: alphabetical → `Verifier` before `VerifyResult` before `VerifyStatus`.
+
+2. **clippy lints under `-D warnings`:**
+   - `needless_range_loop` — `for i in 0..n { x[i] }` → `for (i, v) in x.iter().enumerate()`.
+   - `field_reassign_with_default` — `let mut x = X::default(); x.foo = bar;` → `let mut x = X { foo: bar, ..Default::default() };`.
+   - `needless_lifetimes` — single-ref function params don't need `<'a>` if return type unrelated.
+   - `manual_range_contains` — `t >= 30 && t < 220` → `(30..220).contains(&t)`.
+
+3. **Test assertions about real algorithms:** test the *property* (Otsu picks a value in a sensible range) not specific numerics (exact threshold or pixel count). Synthetic inputs hit edge cases real images never do.
+
+4. **Commit window glitch:** when issuing `Edit` calls in parallel with `Bash git commit`, the commit may run before later edits land in the file. **Fix:** always run Edits FIRST, finish them all, THEN run a single Bash commit. Saw this twice — `caa63e3` and `13d068c` had to be amended via follow-up no-op commits.
+
+**Working state at 2026-05-21 16:40 UTC:**
+- ✅ All 3 CI jobs green
+- ✅ 17/17 Rust unit tests pass
+- ✅ Web app loads in browser, drop zone + batch table render correctly
+- ✅ Repo public at https://github.com/FirstPrinciples-Sun/slip-to-ledger
+- ✅ D1+D2+D4 done (D3 deferred to D12 — synthetic generator)
+- 🟡 Next: D5 (BBL, KTB, BAY, TTB, GSB, TrueMoney adapters — same pattern as KBank/SCB)
+- ⚠️ Blocker still open: install rustup locally to enable `cargo fmt`/`cargo clippy`/`cargo test` pre-push

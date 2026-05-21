@@ -1,0 +1,19 @@
+[package]
+name = "slip-samples-generator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+description = "Generates synthetic Thai slip images for testing (no real PII)"
+
+[[bin]]
+name = "gen-samples"
+path = "src/main.rs"
+
+[dependencies]
+slip-core = { path = "../../crates/slip-core" }
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+image.workspace = true
+chrono.workspace = true

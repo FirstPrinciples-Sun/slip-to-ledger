@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://slip-to-ledger.dev/schema/v0.1.0/normalized-slip.json",
+  "title": "NormalizedSlip",
+  "description": "Canonical representation of a Thai bank/e-wallet payment slip after OCR + parsing.",
+  "type": "object",
+  "required": ["metadata", "transaction", "parties"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["source_bank", "slip_type", "detected_at", "confidence_overall"],
+      "properties": {
+        "source_bank": {
+          "type": "string",
+          "enum": ["kbank", "scb", "bbl", "ktb", "bay", "ttb", "gsb", "tisco", "uob", "lh", "cimb", "truemoney", "rabbit_linepay", "shopeepay", "promptpay", "counter_service", "unknown"]
+        },
+        "slip_type": {
+          "type": "string",
+          "enum": ["bank_transfer", "wallet", "counter_payment", "cross_bank", "unknown"]
+        },
+        "detected_at": { "type": "string", "format": "date-time" },
+        "confidence_overall": { "type": "number", "minimum": 0, "maximum": 1 },
+        "adapter_version": { "type": "string" }
+      }
+    },
+    "transaction": {
+      "type": "object",
+      "required": ["timestamp", "amount", "currency"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "reference": { "type": ["string", "null"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "default": "THB" },
+        "fee": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "parties": {
+      "type": "object",
+      "required": ["sender", "receiver"],
+      "properties": {
+        "sender": { "$ref": "#/$defs/party" },
+        "receiver": { "$ref": "#/$defs/party" }
+      }
+    },
+    "channel": {
+      "type": ["string", "null"],
+      "enum": ["mobile_app", "atm", "counter", "wallet_app", "web", null]
+    },
+    "qr_code": {
+      "type": "object",
+      "properties": {
+        "raw_payload": { "type": ["string", "null"] },
+        "decoded": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        }
+      }
+    },
+    "fraud_signals": {
+      "type": "object",
+      "properties": {
+        "ela_score": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "exif_anomalies": { "type": "array", "items": { "type": "string" } },
+        "duplicate_hash": { "type": ["string", "null"] },
+        "future_dated": { "type": ["boolean", "null"] }
+      }
+    },
+    "field_confidence": {
+      "type": "object",
+      "description": "Per-field confidence in [0,1]. Drives the UI 'needs review' filter.",
+      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+    }
+  },
+  "$defs": {
+    "party": {
+      "type": "object",
+      "properties": {
+        "name": { "type": ["string", "null"] },
+        "account_masked": { "type": ["string", "null"] },
+        "bank": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

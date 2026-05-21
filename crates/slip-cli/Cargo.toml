@@ -1,0 +1,21 @@
+[package]
+name = "slip-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CLI for batch processing Thai bank slips"
+
+[[bin]]
+name = "slip"
+path = "src/main.rs"
+
+[dependencies]
+slip-core = { path = "../slip-core" }
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+walkdir = "2"
+notify = "6"

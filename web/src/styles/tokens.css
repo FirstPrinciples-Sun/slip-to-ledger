@@ -1,0 +1,78 @@
+/* Design tokens — keep in sync with the plan file (UX/UI section). */
+:root {
+  --bg:        #FAFAF7;
+  --surface:   #FFFFFF;
+  --surface-2: #F4F1EA;
+  --border:    #E8E5DE;
+  --text:      #1A1815;
+  --muted:     #6B6760;
+  --accent:    #D97757;
+  --accent-soft: #F2D9CC;
+  --success:   #3F9E6E;
+  --warning:   #D4A23A;
+  --error:     #C4533A;
+
+  --radius-card:  10px;
+  --radius-input:  6px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+
+  --fs-xs: 13px;
+  --fs-sm: 15px;
+  --fs-md: 17px;
+  --fs-lg: 22px;
+  --fs-xl: 32px;
+  --lh:    1.5;
+
+  --font-sans: "IBM Plex Sans Thai", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --motion-fast: 180ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-mid:  280ms cubic-bezier(0.2, 0, 0, 1);
+
+  --shadow-1: 0 1px 2px rgba(26, 24, 21, 0.04), 0 2px 6px rgba(26, 24, 21, 0.04);
+  --shadow-2: 0 4px 12px rgba(26, 24, 21, 0.06), 0 8px 24px rgba(26, 24, 21, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #0E0E0C;
+    --surface:   #161614;
+    --surface-2: #1E1D1A;
+    --border:    #26231F;
+    --text:      #F5F2EB;
+    --muted:     #94908A;
+    --accent:    #E89070;
+    --accent-soft: #3A2A22;
+    --success:   #5DBE8C;
+    --warning:   #E0B654;
+    --error:     #DC6B53;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
+    --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg:        #0E0E0C;
+  --surface:   #161614;
+  --surface-2: #1E1D1A;
+  --border:    #26231F;
+  --text:      #F5F2EB;
+  --muted:     #94908A;
+  --accent:    #E89070;
+  --accent-soft: #3A2A22;
+  --success:   #5DBE8C;
+  --warning:   #E0B654;
+  --error:     #DC6B53;
+}

@@ -11,6 +11,7 @@ pub mod parse;
 pub mod preprocess;
 pub mod qr;
 pub mod schema;
+pub mod thai_utils;
 pub mod verify;
 
 pub use schema::{

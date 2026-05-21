@@ -41,6 +41,9 @@ pub fn all_adapters() -> Vec<Box<dyn BankAdapter>> {
         .collect()
 }
 
+pub mod kbank;
+pub mod scb;
+
 #[macro_export]
 macro_rules! register_adapter {
     ($ty:ty) => {

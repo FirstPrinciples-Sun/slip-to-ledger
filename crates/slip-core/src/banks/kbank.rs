@@ -48,13 +48,7 @@ impl BankAdapter for KbankAdapter {
 
         p.reference = parse_reference_near(
             t,
-            &[
-                "รหัสอ้างอิง",
-                "เลขที่อ้างอิง",
-                "Reference No.",
-                "Ref:",
-                "Ref.",
-            ],
+            &["รหัสอ้างอิง", "เลขที่อ้างอิง", "Reference No.", "Ref:", "Ref."],
         );
         p.transaction_id = parse_reference_near(t, &["Transaction ID", "เลขที่รายการ"]);
 

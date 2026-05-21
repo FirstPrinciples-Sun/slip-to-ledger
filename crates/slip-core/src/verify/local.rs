@@ -1,6 +1,6 @@
 //! Local verifier — schema sanity + duplicate-ref detection. No network.
 
-use super::{VerifyResult, VerifyStatus, Verifier};
+use super::{Verifier, VerifyResult, VerifyStatus};
 use crate::schema::NormalizedSlip;
 use std::collections::HashSet;
 use std::sync::Mutex;

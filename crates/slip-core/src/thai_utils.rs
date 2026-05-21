@@ -52,11 +52,14 @@ static THAI_DATE_RE: Lazy<Regex> = Lazy::new(|| {
     ).unwrap()
 });
 
-static TIME_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(\d{1,2}):(\d{2})(?::(\d{2}))?").unwrap());
+static TIME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\d{1,2}):(\d{2})(?::(\d{2}))?").unwrap());
 
-static AMOUNT_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)\s*(?:บาท|THB|฿)?").unwrap());
+static AMOUNT_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)\s*(?:บาท|THB|฿)?",
+    )
+    .unwrap()
+});
 
 /// Parse a Thai date+time line into a UTC DateTime. Years ≥ 2400 are treated
 /// as Buddhist Era (พ.ศ.) and converted by subtracting 543.
@@ -115,8 +118,7 @@ pub fn parse_amount_near<'a>(text: &'a str, label_patterns: &[&str]) -> Option<f
 }
 
 /// Extract a transaction reference following labels like "เลขที่อ้างอิง" / "Ref".
-static REF_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"[A-Z0-9]{6,}").unwrap());
+static REF_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"[A-Z0-9]{6,}").unwrap());
 
 pub fn parse_reference_near<'a>(text: &'a str, label_patterns: &[&str]) -> Option<String> {
     for label in label_patterns {
@@ -154,7 +156,10 @@ mod tests {
     #[test]
     fn parses_thai_full_month_2_digit_year() {
         let dt = parse_thai_datetime("01 มกราคม 69 09:00:30").unwrap();
-        assert_eq!(dt.format("%Y-%m-%d %H:%M:%S").to_string(), "2026-01-01 02:00:30");
+        assert_eq!(
+            dt.format("%Y-%m-%d %H:%M:%S").to_string(),
+            "2026-01-01 02:00:30"
+        );
     }
 
     #[test]

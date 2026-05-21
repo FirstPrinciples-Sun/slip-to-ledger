@@ -7,8 +7,7 @@ use slip_core::ocr_input::SlipContext;
 use slip_core::qr::{parse_promptpay_tlv, InitMethod};
 
 fn promptpay_static_no_amount() -> String {
-    let body =
-        "00020101021129370016A000000677010111011300668123456785204000053037645802TH6304";
+    let body = "00020101021129370016A000000677010111011300668123456785204000053037645802TH6304";
     let crc = crc16(body.as_bytes());
     format!("{body}{crc:04X}")
 }
@@ -41,7 +40,7 @@ fn promptpay_static_round_trip() {
 #[test]
 fn parse_pipeline_with_qr_anchors_amount() {
     let mut payload = String::from(
-        "00020101021229370016A000000677010111011300668123456785204000053037645406250.005802TH6304"
+        "00020101021229370016A000000677010111011300668123456785204000053037645406250.005802TH6304",
     );
     let crc = crc16(payload.as_bytes());
     payload.push_str(&format!("{crc:04X}"));

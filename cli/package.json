@@ -1,0 +1,21 @@
+{
+  "name": "slip-to-ledger-cli",
+  "version": "0.1.0-dev",
+  "description": "CLI for batch processing Thai bank slips — Node.js port",
+  "type": "module",
+  "bin": {
+    "slip": "./src/main.ts"
+  },
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "tesseract.js": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.5.0"
+  }
+}

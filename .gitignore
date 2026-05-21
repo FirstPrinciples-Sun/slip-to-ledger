@@ -18,3 +18,5 @@ samples/private/
 .vscode/
 .idea/
 *.swp
+
+cli/node_modules/

@@ -11,6 +11,7 @@ export interface SlipRow {
   status: SlipStatus;
   raw?: unknown;
   imageDataUrl?: string;
+  edited?: boolean;
 }
 
 export interface AppState {

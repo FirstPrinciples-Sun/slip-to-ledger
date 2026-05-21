@@ -52,10 +52,17 @@ export function renderApp(root: HTMLElement) {
       }),
     );
     main.appendChild(
-      renderBatchTable(state, (id) => {
-        state.selectedId = state.selectedId === id ? null : id;
-        rerender();
-      }),
+      renderBatchTable(
+        state,
+        (id) => {
+          state.selectedId = state.selectedId === id ? null : id;
+          rerender();
+        },
+        (f) => {
+          state.filter = f;
+          rerender();
+        },
+      ),
     );
     layout.appendChild(main);
 
@@ -63,10 +70,33 @@ export function renderApp(root: HTMLElement) {
       const slip = state.slips.find((s) => s.id === state.selectedId);
       if (slip) {
         layout.appendChild(
-          renderDetailPanel(slip, () => {
-            state.selectedId = null;
-            rerender();
-          }),
+          renderDetailPanel(
+            slip,
+            () => {
+              state.selectedId = null;
+              rerender();
+            },
+            (patch) => {
+              const r = state.slips.find((x) => x.id === slip.id);
+              if (!r) return;
+              Object.assign(r, patch);
+              if (patch.amount !== undefined && r.amount !== null && r.bank !== "—") {
+                r.status = "ready";
+              }
+            },
+            () => {
+              state.slips = state.slips.filter((x) => x.id !== slip.id);
+              state.selectedId = null;
+              rerender();
+            },
+            () => {
+              const reviewing = state.slips.filter((x) => x.status === "review");
+              const idx = reviewing.findIndex((x) => x.id === slip.id);
+              const next = reviewing[idx + 1];
+              state.selectedId = next?.id ?? null;
+              rerender();
+            },
+          ),
         );
       }
     }

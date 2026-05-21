@@ -4,6 +4,7 @@ import type { AppState, SlipRow } from "../state";
 export function renderBatchTable(
   state: AppState,
   onSelectRow: (id: string) => void,
+  onFilter: (f: AppState["filter"]) => void,
 ): HTMLElement {
   const wrap = document.createElement("div");
   wrap.style.marginTop = "var(--space-5)";
@@ -12,11 +13,16 @@ export function renderBatchTable(
   const toolbar = document.createElement("div");
   toolbar.className = "batch-toolbar";
   toolbar.innerHTML = `
-    <span class="filter-pill ${state.filter === "all" ? "active" : ""}">${t("filter_all")} (${state.slips.length})</span>
-    <span class="filter-pill ${state.filter === "ready" ? "active" : ""}">${t("filter_ready")} (${counts.ready})</span>
-    <span class="filter-pill ${state.filter === "review" ? "active" : ""}">${t("filter_review")} (${counts.review})</span>
-    <span class="filter-pill ${state.filter === "failed" ? "active" : ""}">${t("filter_failed")} (${counts.failed})</span>
+    <button class="filter-pill ${state.filter === "all" ? "active" : ""}" data-filter="all">${t("filter_all")} (${state.slips.length})</button>
+    <button class="filter-pill ${state.filter === "ready" ? "active" : ""}" data-filter="ready">${t("filter_ready")} (${counts.ready})</button>
+    <button class="filter-pill ${state.filter === "review" ? "active" : ""}" data-filter="review">${t("filter_review")} (${counts.review})</button>
+    <button class="filter-pill ${state.filter === "failed" ? "active" : ""}" data-filter="failed">${t("filter_failed")} (${counts.failed})</button>
   `;
+  toolbar.querySelectorAll<HTMLButtonElement>(".filter-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      onFilter(btn.dataset.filter as AppState["filter"]);
+    });
+  });
   wrap.appendChild(toolbar);
 
   if (state.slips.length === 0) {
@@ -24,6 +30,16 @@ export function renderBatchTable(
     empty.style.cssText =
       "padding: var(--space-8) 0; text-align: center; color: var(--muted);";
     empty.textContent = t("empty");
+    wrap.appendChild(empty);
+    return wrap;
+  }
+
+  const rows = filterRows(state);
+  if (rows.length === 0) {
+    const empty = document.createElement("div");
+    empty.style.cssText =
+      "padding: var(--space-8) 0; text-align: center; color: var(--muted);";
+    empty.textContent = "ไม่มีสลิปที่ตรงกับตัวกรอง";
     wrap.appendChild(empty);
     return wrap;
   }
@@ -43,7 +59,7 @@ export function renderBatchTable(
     <tbody></tbody>
   `;
   const tbody = table.querySelector("tbody")!;
-  for (const s of filterRows(state)) {
+  for (const s of rows) {
     const tr = renderRow(s, state.selectedId === s.id);
     tr.addEventListener("click", () => onSelectRow(s.id));
     tbody.appendChild(tr);

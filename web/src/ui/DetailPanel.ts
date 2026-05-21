@@ -1,7 +1,13 @@
 import type { SlipRow } from "../state";
 import type { ParsedSlip } from "../parse";
 
-export function renderDetailPanel(slip: SlipRow, onClose: () => void): HTMLElement {
+export function renderDetailPanel(
+  slip: SlipRow,
+  onClose: () => void,
+  onEdit: (patch: Partial<SlipRow>) => void,
+  onDelete: () => void,
+  onSaveAndNext: () => void,
+): HTMLElement {
   const panel = document.createElement("aside");
   panel.className = "detail-panel";
   const parsed = slip.raw as ParsedSlip | undefined;
@@ -10,22 +16,39 @@ export function renderDetailPanel(slip: SlipRow, onClose: () => void): HTMLEleme
     <div class="detail-head">
       <button class="btn ghost" id="close-panel" aria-label="Close">✕</button>
       <strong>${escape(slip.filename)}</strong>
+      ${slip.edited ? '<span class="edited-badge">edited</span>' : ""}
+      <button class="btn ghost danger" id="delete-slip" aria-label="Delete">ลบ</button>
     </div>
 
     <div class="detail-body">
       ${slip.imageDataUrl ? `<img class="detail-image" src="${slip.imageDataUrl}" alt="slip" />` : ""}
 
-      <h3>Parsed fields</h3>
-      <dl class="kv">
-        ${row("Bank", slip.bank)}
-        ${row("Amount", slip.amount !== null ? slip.amount.toLocaleString("en-US", { minimumFractionDigits: 2 }) : "❌ not found")}
-        ${row("Date", slip.date ?? "❌ not found")}
-        ${row("Reference", parsed?.reference ?? "❌ not found")}
-        ${row("Sender", parsed?.senderName ?? "—")}
-        ${row("Receiver", parsed?.receiverName ?? "—")}
-        ${row("Fee", parsed?.fee !== null && parsed?.fee !== undefined ? String(parsed.fee) : "—")}
-        ${row("OCR confidence", `${Math.round(slip.confidence * 100)}%`)}
-      </dl>
+      <h3>Edit fields</h3>
+      <div class="edit-form">
+        <label>
+          <span>ธนาคาร</span>
+          <input type="text" data-field="bank" value="${escape(slip.bank)}" />
+        </label>
+        <label>
+          <span>จำนวนเงิน (THB)</span>
+          <input type="number" step="0.01" data-field="amount" value="${slip.amount ?? ""}" />
+        </label>
+        <label>
+          <span>วันที่ (YYYY-MM-DD)</span>
+          <input type="date" data-field="date" value="${slip.date ?? ""}" />
+        </label>
+        <div class="kbd-hint">บันทึก: <kbd>Ctrl</kbd>+<kbd>↵</kbd> · ปิด: <kbd>Esc</kbd></div>
+      </div>
+
+      <h3>OCR confidence</h3>
+      <div class="kv">
+        <dt>Overall</dt><dd>${Math.round(slip.confidence * 100)}%</dd>
+        <dt>Status</dt><dd>${slip.status}</dd>
+        <dt>Reference</dt><dd>${escape(parsed?.reference ?? "—")}</dd>
+        <dt>Sender</dt><dd>${escape(parsed?.senderName ?? "—")}</dd>
+        <dt>Receiver</dt><dd>${escape(parsed?.receiverName ?? "—")}</dd>
+        <dt>Fee</dt><dd>${parsed?.fee ?? "—"}</dd>
+      </div>
 
       <h3 style="display:flex; align-items:center; justify-content:space-between;">
         Raw OCR text
@@ -33,28 +56,50 @@ export function renderDetailPanel(slip: SlipRow, onClose: () => void): HTMLEleme
       </h3>
       <pre class="raw-ocr">${escape(parsed?.rawText ?? "(no OCR text)")}</pre>
 
-      <h3 style="display:flex; align-items:center; justify-content:space-between;">
-        Parsed JSON
-        <button class="btn ghost" id="copy-json" style="font-size:11px; padding:4px 10px;">copy</button>
-      </h3>
-      <pre class="raw-ocr">${escape(JSON.stringify(parsed ?? slip, null, 2))}</pre>
-
       ${slip.status === "review" ? hintBlock(parsed) : ""}
     </div>
   `;
 
+  // Wire inputs to onEdit
+  panel.querySelectorAll<HTMLInputElement>("input[data-field]").forEach((input) => {
+    input.addEventListener("input", () => {
+      const field = input.dataset.field!;
+      let value: string | number | null = input.value;
+      if (field === "amount") {
+        const n = parseFloat(input.value);
+        value = isNaN(n) ? null : n;
+      } else if (field === "date") {
+        value = input.value || null;
+      }
+      onEdit({ [field]: value, edited: true } as Partial<SlipRow>);
+    });
+  });
+
   panel.querySelector("#close-panel")?.addEventListener("click", onClose);
+  panel.querySelector("#delete-slip")?.addEventListener("click", () => {
+    if (confirm(`ลบสลิป "${slip.filename}"?`)) onDelete();
+  });
   panel.querySelector("#copy-raw")?.addEventListener("click", () => {
     void navigator.clipboard.writeText(parsed?.rawText ?? "");
   });
-  panel.querySelector("#copy-json")?.addEventListener("click", () => {
-    void navigator.clipboard.writeText(JSON.stringify(parsed ?? slip, null, 2));
-  });
-  return panel;
-}
 
-function row(label: string, value: string): string {
-  return `<dt>${escape(label)}</dt><dd>${escape(value)}</dd>`;
+  // Keyboard shortcuts within panel
+  const keyHandler = (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      onSaveAndNext();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      onClose();
+    }
+  };
+  panel.addEventListener("keydown", keyHandler);
+  // Auto-focus first review field
+  setTimeout(() => {
+    panel.querySelector<HTMLInputElement>('input[data-field="amount"]')?.focus();
+  }, 0);
+
+  return panel;
 }
 
 function hintBlock(parsed?: ParsedSlip): string {
@@ -68,8 +113,7 @@ function hintBlock(parsed?: ParsedSlip): string {
   return `
     <div class="hint-block">
       <strong>Why review?</strong> Couldn't extract: <code>${missing.join(", ")}</code>.
-      Send the raw OCR text above as a GitHub issue —
-      help us add this slip layout to the parser.
+      Fix above and press <kbd>Ctrl</kbd>+<kbd>↵</kbd> to save and jump to the next slip needing review.
     </div>
   `;
 }

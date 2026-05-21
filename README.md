@@ -1,128 +1,125 @@
 # Slip-to-Ledger
 
-> สลิปโอนเงิน → Sheet ใน 3 วินาที. Bank slips to spreadsheets, in seconds.
+> **สลิปโอนเงิน → Sheet ใน 3 วินาที.** Bank slips to spreadsheets, in seconds.
 
-OCR สำหรับสลิปโอนเงินไทยทุกธนาคาร (KBank, SCB, BBL, KTB, BAY, TTB, GSB, TrueMoney, PromptPay QR …) — รันในเบราว์เซอร์ของคุณเอง สลิปไม่ถูกอัปโหลดที่ไหน มี CLI สำหรับ batch + webhook export ไป Google Sheets / LINE / Discord
+OCR สำหรับสลิปโอนเงินไทยทุกธนาคาร — รันในเบราว์เซอร์ของคุณเอง สลิปไม่ถูกอัปโหลดที่ไหน ส่งออกเป็น JSON / CSV / Webhook ได้ทันที
 
-## สถานะปัจจุบัน
+[![CI](https://github.com/FirstPrinciples-Sun/slip-to-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/FirstPrinciples-Sun/slip-to-ledger/actions/workflows/ci.yml)
+[![Live Demo](https://img.shields.io/badge/demo-live-D97757)](https://firstprinciples-sun.github.io/slip-to-ledger/)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT_OR_Apache--2.0-blue)](#license)
 
-**Alpha · กำลังพัฒนา · MVP target 14 วัน**
+🟢 **ลองเลย:** https://firstprinciples-sun.github.io/slip-to-ledger/
 
-ความคืบหน้า **D4 / D14** (~29%)
+---
 
-| วัน | งาน | สถานะ |
+## Features
+
+- 📄 **Drag · drop · paste · 📷 capture** — รับ PNG / JPG / PDF (PDF.js)
+- 🇹🇭 **9 ธนาคาร / wallet:** KBank · SCB · BBL · KTB · Krungsri · TTB · GSB · TrueMoney · PromptPay
+- 🔒 **100% client-side** — OCR ทำงานในเบราว์เซอร์ ไม่อัปโหลดสลิปที่ไหน
+- ✏️ **Inline edit + ⌘↵ save-and-next** — แก้ฟิลด์ที่ OCR อ่านผิดได้ในตัว, กดเดียวข้ามไปสลิปถัดไปที่ต้อง review
+- 🛡️ **Local verifier** — ตรวจจับสลิปซ้ำ (SHA-256 + duplicate ref), วันที่ในอนาคต, จำนวนเงินผิด
+- 📊 **Confidence score per row** — 5-dot meter ชี้ field ที่น่าจะอ่านผิด
+- 📤 **Export:** Copy JSON · Download CSV / JSON · Generic webhook (LINE / Discord / Sheet relay)
+- 🌗 **Dark mode + TH/EN toggle** — persist ผ่าน localStorage
+- 🎨 **Warm terracotta UI** — IBM Plex Sans Thai, ไม่ใช่สี bank-blue น่าเบื่อ
+
+## Status — D14 / 14 (~93%)
+
+| ช่วง | งาน | สถานะ |
 |---|---|---|
-| D1 | Workspace, schema, web scaffold, CI | ✅ เสร็จ |
-| D2-3 | Image preprocessing + EMVCo TLV parser + CRC | ✅ D2 เสร็จ |
-| D4 | thai_utils + KBank + SCB adapters | ✅ เสร็จ |
-| D5 | BBL, KTB, BAY, TTB, GSB, TrueMoney adapters | 🟡 ถัดไป |
-| D6-7 | WASM bindings + tesseract.js + drag-drop demo | ⬜ |
-| D8 | CLI batch + watch mode | ⬜ |
-| D9 | Verifier plugins (Local, BOT, Slipok, Webhook) | ⬜ |
-| D10 | Detail editor UI + fraud heuristics | ⬜ |
-| D11 | Webhook export (Sheets/LINE/Discord) + Cloudflare relay | ⬜ |
-| D12 | Synthetic slip generator + golden snapshots | ⬜ |
-| D13 | Docs + screencast | ⬜ |
-| D14 | v0.1.0 release + GH Pages deploy | ⬜ |
+| D1 | Workspace + schema + CI | ✅ |
+| D2 | Otsu binarization + EMVCo TLV + CRC | ✅ |
+| D3 | Synthetic generator | ⏭ deferred to D12 |
+| D4 | thai_utils + adapter framework | ✅ |
+| D5 | Bank adapters (9 banks via JS-side parser) | ✅ |
+| D6-7 | tesseract.js + drag-drop end-to-end | ✅ |
+| D8 | CLI batch + watch | 🟡 stubs only — needs Rust toolchain |
+| D9 | Local verifier (dup detect + suspicious) | ✅ |
+| D10 | Inline edit + filter pills + save-and-next | ✅ |
+| D11 | Export modal (JSON / CSV / webhook) | ✅ |
+| D12 | Synthetic generator + golden snapshots | ⬜ |
+| D13 | README + screencast | 🟡 README done, screencast pending |
+| D14 | Live deploy on GitHub Pages | ✅ |
 
-**ใช้งานได้แล้ว:**
-- Web UI scaffold (drag-drop, batch table, design tokens) — `cd web && npm run dev`
-- PromptPay/EMVCo QR TLV parser พร้อม CRC validation (ตรวจ vector มาตรฐานผ่าน)
-- Otsu binarization + skew estimation
-- Adapter framework + KBank + SCB parsers (regex-based, ทดสอบกับ fixture แล้ว)
-
-**ยังไม่ทำงาน:**
-- OCR engine (D6-7 — ต้อง wire tesseract.js)
-- WASM build (D6-7 — ต้อง install Rust toolchain ก่อน)
-- CLI binary (D8)
-- ส่งออกไป Google Sheets / LINE / Discord (D11)
-
-**Blocker:** Rust toolchain ยังไม่ได้ install บนเครื่อง dev — ต้อง `rustup` ก่อนรัน `cargo test` ในเครื่อง (CI บน GitHub Actions cover แล้ว). ดู [progress log](./docs/progress.md) สำหรับรายละเอียดทุกวัน
-
-## ทำไมต้องมีโปรเจ็คนี้
-
-- ฟรีแลนซ์/ร้านค้าไทยต้องบันทึกรายรับจากสลิปโอนเงินมือเปล่า ทุกวัน ทุกธนาคาร format ต่างกัน
-- เครื่องมือที่มีอยู่เป็น SaaS ผูกบัญชีร้านค้า ไม่เหมาะกับ dev ที่อยาก self-host
-- ยังไม่มี OSS ที่ทำเรื่องนี้ดีๆ ครอบคลุมทุกธนาคารหลัก
-
-## สิ่งที่ทำได้ (เป้าหมาย v0.1)
-
-- Drag-drop สลิป (PNG/JPG/PDF) → JSON มาตรฐานเดียวกัน
-- รองรับธนาคารหลักไทย + e-wallet + PromptPay QR
-- ตรวจจับสลิปซ้ำ / สลิปปลอม (ELA, EXIF, perceptual hash)
-- ทุก field มี confidence score → UI ชี้ field ที่ต้อง review
-- Export: JSON / CSV / Google Sheets / LINE / Discord webhook
-- Verify pluggable: Local (default), BOT slip-verify, RDCW slipok
-- 100% client-side ใน browser — privacy-first
-
-## โครงสร้างโปรเจ็ค
-
-```
-slip-to-ledger/
-├── crates/
-│   ├── slip-core/   # Pure Rust core: schema, parsing, QR, fraud, verify
-│   ├── slip-cli/    # CLI: batch processing + webhook export
-│   └── slip-wasm/   # WASM bindings สำหรับ browser
-├── web/             # Vanilla TS + Vite frontend
-├── samples/         # Synthetic slip generator + ground-truth JSON
-└── schema.json      # Canonical NormalizedSlip JSON schema
-```
+ดู [docs/progress.md](docs/progress.md) สำหรับ progress log + postmortem ทุกวัน
 
 ## Quick start
 
-> Rust toolchain ยังไม่ได้ install — ดู [Setup](#setup)
+### Try it (no install)
+👉 https://firstprinciples-sun.github.io/slip-to-ledger/
 
-### Web (frontend only — Day 1 ใช้ได้)
+### Run locally
 
 ```bash
-cd web
+git clone https://github.com/FirstPrinciples-Sun/slip-to-ledger
+cd slip-to-ledger/web
 npm install
 npm run dev
 ```
 
-เปิด `http://localhost:5173` → ลาก slip ลง drop zone
+เปิด http://localhost:5173
 
-### CLI (Day 8)
+### Rust core (optional, for `slip-core` development)
 
-```bash
-cargo run -p slip-cli -- parse path/to/slip.png --format json
-cargo run -p slip-cli -- watch ./inbox
-```
-
-### WASM build (Day 6-7)
+ต้องมี Rust toolchain — install ผ่าน [rustup.rs](https://rustup.rs)
 
 ```bash
-cd crates/slip-wasm
-wasm-pack build --target web --out-dir ../../web/pkg
+rustup target add wasm32-unknown-unknown
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-## Setup
+## Project layout
 
-ต้องมี:
-
-- **Rust** stable + `wasm32-unknown-unknown` target ([rustup.rs](https://rustup.rs))
-- **Node.js** 20+ และ npm
-- **wasm-pack** (`cargo install wasm-pack`)
+```
+slip-to-ledger/
+├── crates/
+│   ├── slip-core/    # Pure Rust: schema, parsing, QR/TLV, preprocess, verify
+│   ├── slip-cli/     # CLI: batch processing + webhook export (stub)
+│   └── slip-wasm/    # WASM bindings — browser-only facade
+├── web/              # Vanilla TS + Vite — what GH Pages serves
+├── samples/          # Synthetic slip generator (D12)
+├── schema.json       # Canonical NormalizedSlip JSON Schema
+└── docs/progress.md  # Daily progress log
+```
 
 ## Architecture
 
-ดู `C:/Users/ACER/.claude/plans/c-users-acer-projects-generic-wadler.md` สำหรับ plan เต็ม
-รวม UX/UI design, 14-day schedule, risk register, progress log
+**Hybrid pipeline:**
+```
+upload → SHA-256 hash → preprocess → QR decode (high-confidence anchor)
+       → tesseract.js OCR (Thai+Eng) → bank detect → adapter parse
+       → validate → fraud check → verify → render row
+```
 
-หลักการสั้นๆ:
+**Privacy boundary:** `slip-core` ไม่ทำ network call. `slip-cli` เป็น crate เดียวที่เรียก HTTP. `slip-wasm` เป็น facade ของ core สำหรับเบราว์เซอร์.
 
-- **Hybrid pipeline:** preprocess → QR decode (high-confidence anchor) → OCR → bank detect → bank-specific parser → validate → fraud check
-- **Privacy boundary:** `slip-core` ไม่มี network เลย; `slip-cli` คือตัวเดียวที่ต่อ HTTP; `slip-wasm` เป็น facade ของ core บน browser
-- **Bank adapters:** เพิ่มธนาคารใหม่ = สร้างไฟล์เดียวใน `crates/slip-core/src/banks/<bank>.rs`
+**QR > OCR override:** ถ้าเจอ PromptPay QR ในสลิป จะใช้ amount/ref จาก TLV (high-confidence) แทนค่าที่ OCR อ่านได้ — เพราะ QR carrier ตัวเลขแน่นอน 100%.
+
+**Adapter pattern:** เพิ่มธนาคารใหม่ = ไฟล์เดียวที่ `crates/slip-core/src/banks/<bank>.rs` + `inventory::submit!` หนึ่งบรรทัด ดู [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Roadmap (post v0.1)
+
+- [ ] Synthetic slip generator + golden snapshot tests in CI (D12)
+- [ ] Native CLI binary with file-watch + verifier plugins (D8)
+- [ ] BOT slip-verify integration via self-hosted relay (Cloudflare Worker example included)
+- [ ] Counter Service slip support (7-Eleven, Lotus, Big C bill payments)
+- [ ] Per-field bounding-box highlights on slip preview (UX nice-to-have)
+- [ ] FlowAccount / PEAK CSV templates
 
 ## Contributing
 
-ดู [CONTRIBUTING.md](CONTRIBUTING.md) — เพิ่ม bank adapter ใหม่ใช้เวลา ~20 บรรทัด
+PRs welcome — especially bank adapter coverage. Adding a new bank takes ~20 lines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+ส่ง raw OCR text ของสลิปที่ parser ของเราไม่อ่าน (ใช้ปุ่ม `copy` ใน detail panel) ก็ช่วยได้มาก — เปิด GitHub Issue พร้อม raw text + bank name.
 
 ## License
 
-Dual-licensed under either:
+Dual-licensed at your option:
 - MIT ([LICENSE-MIT](LICENSE-MIT))
 - Apache 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
 
-at your option.
+---
+
+**Built with:** Rust · TypeScript · Vite · tesseract.js · IBM Plex Sans Thai

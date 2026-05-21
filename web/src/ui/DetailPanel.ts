@@ -23,6 +23,8 @@ export function renderDetailPanel(
     <div class="detail-body">
       ${slip.imageDataUrl ? `<img class="detail-image" src="${slip.imageDataUrl}" alt="slip" />` : ""}
 
+      ${renderVerifyBlock(slip)}
+
       <h3>Edit fields</h3>
       <div class="edit-form">
         <label>
@@ -114,6 +116,18 @@ function hintBlock(parsed?: ParsedSlip): string {
     <div class="hint-block">
       <strong>Why review?</strong> Couldn't extract: <code>${missing.join(", ")}</code>.
       Fix above and press <kbd>Ctrl</kbd>+<kbd>↵</kbd> to save and jump to the next slip needing review.
+    </div>
+  `;
+}
+
+function renderVerifyBlock(slip: SlipRow): string {
+  if (!slip.verify || slip.verify === "verified" || slip.verify === "unverified") return "";
+  const tone = slip.verify === "duplicate" ? "duplicate" : "suspicious";
+  const title = slip.verify === "duplicate" ? "⚠ สลิปซ้ำ" : "⚠ น่าสงสัย";
+  return `
+    <div class="verify-block ${tone}">
+      <strong>${title}</strong>
+      <div>${escape(slip.verifyDetail ?? "")}</div>
     </div>
   `;
 }

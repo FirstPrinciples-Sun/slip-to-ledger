@@ -7,6 +7,7 @@ import { renderDetailPanel } from "./DetailPanel";
 import { renderExportModal } from "./ExportModal";
 import { ocrImage } from "../ocr";
 import { parseSlip, bankLabel } from "../parse";
+import { hashFile, verifyLocal } from "../verify";
 
 export function renderApp(root: HTMLElement) {
   const state: AppState = { ...initialState };
@@ -116,8 +117,12 @@ export function renderApp(root: HTMLElement) {
   async function processSlip(id: string, file: File) {
     try {
       const dataUrl = await fileToDataUrl(file);
+      const fileHash = await hashFile(file);
       const row = state.slips.find((s) => s.id === id);
-      if (row) row.imageDataUrl = dataUrl;
+      if (row) {
+        row.imageDataUrl = dataUrl;
+        row.imageHash = fileHash;
+      }
 
       const ocr = await ocrImage(file);
       const parsed = parseSlip(ocr.text);
@@ -129,6 +134,14 @@ export function renderApp(root: HTMLElement) {
       r.confidence = ocr.confidence;
       r.raw = parsed;
       r.status = decideStatus(parsed, ocr.confidence);
+
+      // Run local verifier — catches dup hash, dup ref, future date, etc.
+      const v = verifyLocal(r, state.slips);
+      r.verify = v.status;
+      r.verifyDetail = v.detail;
+      if (v.status === "duplicate" || v.status === "suspicious") {
+        r.status = "review";
+      }
     } catch (e) {
       const r = state.slips.find((s) => s.id === id);
       if (r) r.status = "failed";

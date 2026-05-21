@@ -86,14 +86,22 @@ function countByStatus(slips: SlipRow[]) {
 function renderRow(s: SlipRow, selected: boolean): HTMLTableRowElement {
   const tr = document.createElement("tr");
   if (selected) tr.classList.add("selected");
+  const verifyBadge = renderVerifyBadge(s);
   tr.innerHTML = `
-    <td><span class="bank-chip">${escapeHtml(s.bank)}</span></td>
+    <td><span class="bank-chip">${escapeHtml(s.bank)}</span>${verifyBadge}</td>
     <td style="text-align:right; font-variant-numeric: tabular-nums;">${formatAmount(s.amount)}</td>
     <td style="color: var(--muted)">${s.date ?? "—"}</td>
     <td>${renderDots(s.confidence)}</td>
     <td>${renderStatus(s.status)}</td>
   `;
   return tr;
+}
+
+function renderVerifyBadge(s: SlipRow): string {
+  if (!s.verify || s.verify === "verified" || s.verify === "unverified") return "";
+  const label = s.verify === "duplicate" ? "ซ้ำ" : "น่าสงสัย";
+  const detail = s.verifyDetail ? ` title="${escapeHtml(s.verifyDetail)}"` : "";
+  return ` <span class="verify-chip ${s.verify}"${detail}>${label}</span>`;
 }
 
 function renderDots(c: number): string {

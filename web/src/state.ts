@@ -1,5 +1,6 @@
 /** Slip row in the batch view. Source of truth from WASM after parse(). */
 export type SlipStatus = "ready" | "review" | "failed" | "processing";
+export type VerifyStatus = "verified" | "duplicate" | "suspicious" | "unverified";
 
 export interface SlipRow {
   id: string;
@@ -12,6 +13,9 @@ export interface SlipRow {
   raw?: unknown;
   imageDataUrl?: string;
   edited?: boolean;
+  verify?: VerifyStatus;
+  verifyDetail?: string;
+  imageHash?: string;
 }
 
 export interface AppState {

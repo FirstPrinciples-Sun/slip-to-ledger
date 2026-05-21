@@ -41,8 +41,9 @@
   --shadow-2: 0 4px 12px rgba(26, 24, 21, 0.06), 0 8px 24px rgba(26, 24, 21, 0.06);
 }
 
+/* OS prefers dark — applies only when user hasn't picked a theme. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg:        #0E0E0C;
     --surface:   #161614;
     --surface-2: #1E1D1A;
@@ -59,8 +60,20 @@
   }
 }
 
+/* Explicit user override — wins over OS preference. */
 [data-theme="light"] {
   color-scheme: light;
+  --bg:        #FAFAF7;
+  --surface:   #FFFFFF;
+  --surface-2: #F4F1EA;
+  --border:    #E8E5DE;
+  --text:      #1A1815;
+  --muted:     #6B6760;
+  --accent:    #D97757;
+  --accent-soft: #F2D9CC;
+  --success:   #3F9E6E;
+  --warning:   #D4A23A;
+  --error:     #C4533A;
 }
 [data-theme="dark"] {
   color-scheme: dark;

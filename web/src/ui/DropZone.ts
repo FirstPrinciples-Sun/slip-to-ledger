@@ -1,3 +1,5 @@
+import { t } from "../i18n";
+
 export function renderDropZone(opts: {
   onFiles: (files: File[]) => void;
 }): HTMLElement {
@@ -7,10 +9,8 @@ export function renderDropZone(opts: {
   el.setAttribute("role", "button");
   el.setAttribute("aria-label", "Drop slips or click to browse");
   el.innerHTML = `
-    <div style="font-size: var(--fs-md); font-weight: 500;">
-      ลากสลิปลงมา · วาง (⌘V) · เลือกไฟล์ · 📷 ถ่าย
-    </div>
-    <div class="hint">PNG, JPG, PDF · ทำงานในเบราว์เซอร์ ไม่อัปโหลดที่ไหน</div>
+    <div style="font-size: var(--fs-md); font-weight: 500;">${t("drop_main")}</div>
+    <div class="hint">${t("drop_hint")}</div>
     <input type="file" multiple accept="image/*,application/pdf" hidden />
   `;
   const input = el.querySelector("input")!;

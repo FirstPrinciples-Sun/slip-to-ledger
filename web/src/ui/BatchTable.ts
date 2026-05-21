@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import type { AppState, SlipRow } from "../state";
 
 export function renderBatchTable(state: AppState): HTMLElement {
@@ -8,10 +9,10 @@ export function renderBatchTable(state: AppState): HTMLElement {
   const toolbar = document.createElement("div");
   toolbar.className = "batch-toolbar";
   toolbar.innerHTML = `
-    <span class="filter-pill ${state.filter === "all" ? "active" : ""}">All (${state.slips.length})</span>
-    <span class="filter-pill ${state.filter === "ready" ? "active" : ""}">✓ Ready (${counts.ready})</span>
-    <span class="filter-pill ${state.filter === "review" ? "active" : ""}">⚠ Review (${counts.review})</span>
-    <span class="filter-pill ${state.filter === "failed" ? "active" : ""}">✕ Failed (${counts.failed})</span>
+    <span class="filter-pill ${state.filter === "all" ? "active" : ""}">${t("filter_all")} (${state.slips.length})</span>
+    <span class="filter-pill ${state.filter === "ready" ? "active" : ""}">${t("filter_ready")} (${counts.ready})</span>
+    <span class="filter-pill ${state.filter === "review" ? "active" : ""}">${t("filter_review")} (${counts.review})</span>
+    <span class="filter-pill ${state.filter === "failed" ? "active" : ""}">${t("filter_failed")} (${counts.failed})</span>
   `;
   wrap.appendChild(toolbar);
 
@@ -19,7 +20,7 @@ export function renderBatchTable(state: AppState): HTMLElement {
     const empty = document.createElement("div");
     empty.style.cssText =
       "padding: var(--space-8) 0; text-align: center; color: var(--muted);";
-    empty.textContent = "ยังไม่มีสลิป — ลากมาวางได้เลย";
+    empty.textContent = t("empty");
     wrap.appendChild(empty);
     return wrap;
   }
@@ -29,11 +30,11 @@ export function renderBatchTable(state: AppState): HTMLElement {
   table.innerHTML = `
     <thead>
       <tr>
-        <th>ธนาคาร</th>
-        <th style="text-align:right">จำนวนเงิน (THB)</th>
-        <th>วันที่</th>
-        <th>ความมั่นใจ</th>
-        <th>สถานะ</th>
+        <th>${t("table_bank")}</th>
+        <th style="text-align:right">${t("table_amount")}</th>
+        <th>${t("table_date")}</th>
+        <th>${t("table_confidence")}</th>
+        <th>${t("table_status")}</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -85,10 +86,10 @@ function renderDots(c: number): string {
 
 function renderStatus(s: SlipRow["status"]): string {
   switch (s) {
-    case "ready":   return `<span class="status ok">✓ พร้อมส่งออก</span>`;
-    case "review":  return `<span class="status review">⚠ ตรวจทาน</span>`;
-    case "failed":  return `<span class="status failed">✕ อ่านไม่ได้</span>`;
-    case "processing": return `<span class="status" style="color:var(--muted)">… กำลังอ่าน</span>`;
+    case "ready":      return `<span class="status ok">${t("status_ready")}</span>`;
+    case "review":     return `<span class="status review">${t("status_review")}</span>`;
+    case "failed":     return `<span class="status failed">${t("status_failed")}</span>`;
+    case "processing": return `<span class="status" style="color:var(--muted)">${t("status_processing")}</span>`;
   }
 }
 

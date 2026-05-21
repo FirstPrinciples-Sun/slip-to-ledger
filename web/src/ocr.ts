@@ -1,8 +1,6 @@
 /**
  * tesseract.js worker. Lazy-loaded — caller must await `getOcrWorker()`
  * before processing the first image. Worker is cached for subsequent calls.
- *
- * D6-7: full implementation. Stub for D1.
  */
 import { createWorker, type Worker } from "tesseract.js";
 
@@ -25,8 +23,16 @@ export function getOcrWorker(): Promise<Worker> {
   return workerPromise;
 }
 
-export async function ocrImage(file: File): Promise<{ text: string; words: unknown[] }> {
+export interface OcrResult {
+  text: string;
+  confidence: number;
+}
+
+export async function ocrImage(file: File | Blob): Promise<OcrResult> {
   const w = await getOcrWorker();
   const { data } = await w.recognize(file);
-  return { text: data.text, words: data.words ?? [] };
+  return {
+    text: data.text ?? "",
+    confidence: (data.confidence ?? 0) / 100,
+  };
 }

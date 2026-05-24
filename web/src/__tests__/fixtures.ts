@@ -194,6 +194,72 @@ True Money Wallet
       reference: "TMW20260615REF",
     },
   },
+  {
+    bank: "tisco",
+    text: `TISCO Mobile
+โอนเงินสำเร็จ
+15 พ.ค. 2569 14:32
+ธนาคารทิสโก้
+จาก
+นาย สมชาย ใจดี
+xxx-x-x1234-5
+ไปยัง
+บจก. เอบีซี จำกัด
+xxx-x-x6789-0
+ยอดเงิน 600.00 บาท
+ค่าธรรมเนียม 0.00 บาท
+เลขที่อ้างอิง TIS20260515X`,
+    expect: {
+      bank: "tisco",
+      amount: 600.0,
+      date: "2026-05-15",
+      reference: "TIS20260515X",
+    },
+  },
+  {
+    bank: "uob",
+    text: `UOB Thai
+โอนเงินสำเร็จ
+15 พ.ค. 2569 14:32
+ธนาคารยูโอบี
+จาก
+นาย สมชาย ใจดี
+xxx-x-x1234-5
+ไปยัง
+บจก. เอบีซี จำกัด
+xxx-x-x6789-0
+ยอดเงิน 1,200.00 บาท
+ค่าธรรมเนียม 0.00 บาท
+Reference No. UOB20260515ABC`,
+    expect: {
+      bank: "uob",
+      amount: 1200.0,
+      date: "2026-05-15",
+      reference: "UOB20260515ABC",
+    },
+  },
+  {
+    bank: "cimb",
+    text: `OCTO by CIMB
+โอนเงินสำเร็จ
+15 พ.ค. 2569 14:32
+ซีไอเอ็มบีไทย
+จาก
+นาย สมชาย ใจดี
+xxx-x-x1234-5
+ไปยัง
+บจก. เอบีซี จำกัด
+xxx-x-x6789-0
+ยอดเงิน 850.00 บาท
+ค่าธรรมเนียม 0.00 บาท
+Reference CIMB20260515Z`,
+    expect: {
+      bank: "cimb",
+      amount: 850.0,
+      date: "2026-05-15",
+      reference: "CIMB20260515Z",
+    },
+  },
   // Edge case: amount has no labelled match — fallback should pick the
   // "<n> บาท" with the largest value
   {

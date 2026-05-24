@@ -12,6 +12,9 @@ export type SourceBank =
   | "bay"
   | "ttb"
   | "gsb"
+  | "tisco"
+  | "uob"
+  | "cimb"
   | "truemoney"
   | "promptpay"
   | "unknown";
@@ -58,6 +61,9 @@ function detectBank(text: string): { bank: SourceBank; confidence: number } {
     { bank: "bay", score: scoreKeywords(t, orig, ["KMA", "KRUNGSRI", "BAY"], ["กรุงศรี"]) },
     { bank: "ttb", score: scoreKeywords(t, orig, ["TTB", "TMRW"], ["ทหารไทยธนชาต"]) },
     { bank: "gsb", score: scoreKeywords(t, orig, ["GSB", "MYMO"], ["ออมสิน"]) },
+    { bank: "tisco", score: scoreKeywords(t, orig, ["TISCO"], ["ทิสโก้"]) },
+    { bank: "uob", score: scoreKeywords(t, orig, ["UOB", "TMRW BY UOB"], ["ยูโอบี"]) },
+    { bank: "cimb", score: scoreKeywords(t, orig, ["CIMB", "OCTO"], ["ซีไอเอ็มบี"]) },
     { bank: "truemoney", score: scoreKeywords(t, orig, ["TRUEMONEY", "TRUE MONEY"], ["ทรูมันนี่"]) },
     { bank: "promptpay", score: scoreKeywords(t, orig, ["PROMPTPAY"], ["พร้อมเพย์"]) },
   ];
@@ -209,6 +215,9 @@ export function bankLabel(b: SourceBank): string {
     bay: "Krungsri",
     ttb: "TTB",
     gsb: "GSB",
+    tisco: "TISCO",
+    uob: "UOB",
+    cimb: "CIMB",
     truemoney: "TrueMoney",
     promptpay: "PromptPay",
     unknown: "?",

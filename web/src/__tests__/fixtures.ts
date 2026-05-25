@@ -260,6 +260,72 @@ Reference CIMB20260515Z`,
       reference: "CIMB20260515Z",
     },
   },
+  {
+    bank: "lhb",
+    text: `LH Bank Profita
+แลนด์ แอนด์ เฮ้าส์
+โอนเงินสำเร็จ
+12 มิ.ย. 2569 10:15
+จาก
+นาย ที่ดิน บ้านดี
+xxx-x-x2222-1
+ไปยัง
+บจก. โฮมแลนด์
+xxx-x-x3333-2 LHB
+จำนวนเงิน 4,500.00 บาท
+ค่าธรรมเนียม 0.00 บาท
+เลขที่อ้างอิง LHB20260612REF1`,
+    expect: {
+      bank: "lhb",
+      amount: 4500.0,
+      date: "2026-06-12",
+      reference: "LHB20260612REF1",
+    },
+  },
+  {
+    bank: "kkp",
+    text: `KKP DIME
+เกียรตินาคินภัทร
+โอนเงินสำเร็จ
+18 มิ.ย. 2569 16:20
+จาก
+นางสาว ภัทรา ทองคำ
+xxx-x-x4444-3
+ไปยัง
+บจก. แคปปิตอล โกรท
+xxx-x-x5555-4 KKP
+จำนวนเงิน 7,800.50 บาท
+ค่าธรรมเนียม 0.00 บาท
+Reference No. KKP20260618ABC`,
+    expect: {
+      bank: "kkp",
+      amount: 7800.5,
+      date: "2026-06-18",
+      reference: "KKP20260618ABC",
+    },
+  },
+  {
+    bank: "icbc",
+    text: `ICBC Thai
+ไอซีบีซี (ไทย)
+โอนเงินสำเร็จ
+25 มิ.ย. 2569 09:45
+จาก
+นาย หลี่ เจิ้ง
+xxx-x-x6666-5
+ไปยัง
+บจก. ดราก้อน เทรด
+xxx-x-x7777-6 ICBC
+ยอดที่โอน 15,000.00 บาท
+ค่าธรรมเนียม 35.00 บาท
+รหัสอ้างอิง ICBC20260625XY`,
+    expect: {
+      bank: "icbc",
+      amount: 15000.0,
+      date: "2026-06-25",
+      reference: "ICBC20260625XY",
+    },
+  },
   // Edge case: amount has no labelled match — fallback should pick the
   // "<n> บาท" with the largest value
   {

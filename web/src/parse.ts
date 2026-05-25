@@ -15,6 +15,9 @@ export type SourceBank =
   | "tisco"
   | "uob"
   | "cimb"
+  | "lhb"
+  | "kkp"
+  | "icbc"
   | "truemoney"
   | "promptpay"
   | "unknown";
@@ -64,6 +67,9 @@ function detectBank(text: string): { bank: SourceBank; confidence: number } {
     { bank: "tisco", score: scoreKeywords(t, orig, ["TISCO"], ["ทิสโก้"]) },
     { bank: "uob", score: scoreKeywords(t, orig, ["UOB", "TMRW BY UOB"], ["ยูโอบี"]) },
     { bank: "cimb", score: scoreKeywords(t, orig, ["CIMB", "OCTO"], ["ซีไอเอ็มบี"]) },
+    { bank: "lhb", score: scoreKeywords(t, orig, ["LH BANK", "LHB", "PROFITA"], ["แลนด์ แอนด์ เฮ้าส์", "แลนด์แอนด์เฮ้าส์"]) },
+    { bank: "kkp", score: scoreKeywords(t, orig, ["KKP", "KIATNAKIN", "DIME"], ["เกียรตินาคิน", "เกียรตินาคินภัทร"]) },
+    { bank: "icbc", score: scoreKeywords(t, orig, ["ICBC"], ["ไอซีบีซี", "ไอ ซี บี ซี"]) },
     { bank: "truemoney", score: scoreKeywords(t, orig, ["TRUEMONEY", "TRUE MONEY"], ["ทรูมันนี่"]) },
     { bank: "promptpay", score: scoreKeywords(t, orig, ["PROMPTPAY"], ["พร้อมเพย์"]) },
   ];
@@ -218,6 +224,9 @@ export function bankLabel(b: SourceBank): string {
     tisco: "TISCO",
     uob: "UOB",
     cimb: "CIMB",
+    lhb: "LH Bank",
+    kkp: "KKP",
+    icbc: "ICBC",
     truemoney: "TrueMoney",
     promptpay: "PromptPay",
     unknown: "?",
